@@ -115,8 +115,8 @@ public class ParticleLayout extends FrameLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (isSwape) {
-                    float width = startX - event.getX();
+                float width = startX - event.getX();
+                if (isSwape && width > 0) {
                     mLayoutParams = new FrameLayout.LayoutParams((int) width, FrameLayout.LayoutParams.MATCH_PARENT, Gravity.RIGHT);
                     frontLayout.setLayoutParams(mLayoutParams);
                     frontLayout.getLocationInWindow(location);
@@ -124,6 +124,12 @@ public class ParticleLayout extends FrameLayout {
                     particleSystem_2_5.updateEmitPoint(frontLayout.getLeft(), location[1] + frontLayout.getHeight() * 2 / 5);
                     particleSystem_3_5.updateEmitPoint(frontLayout.getLeft(), location[1] + frontLayout.getHeight() * 3 / 5);
                     particleSystem_4_5.updateEmitPoint(frontLayout.getLeft(), location[1] + frontLayout.getHeight() * 4 / 5);
+                }else{
+                    particleSystem_1_5.stopEmitting();
+                    particleSystem_2_5.stopEmitting();
+                    particleSystem_3_5.stopEmitting();
+                    particleSystem_4_5.stopEmitting();
+                    particleSystem_5_5.stopEmitting();
                 }
                 getParent().requestDisallowInterceptTouchEvent(true);
                 break;
