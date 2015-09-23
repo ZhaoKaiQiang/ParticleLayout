@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -25,8 +24,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         layoutManager = new LinearLayoutManager(this);
@@ -68,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             mAdapter.notifyDataSetChanged();
                         }
-                    }, 400);
+                    }, 350);
                 }
             });
         }
