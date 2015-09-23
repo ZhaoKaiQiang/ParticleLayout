@@ -1,7 +1,6 @@
 package com.socks.particledeleteview;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,8 +19,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ParticleAdapter mAdapter;
     private LinearLayoutManager layoutManager;
-
-    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,23 +53,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(ParticleViewHolder holder, final int position) {
+        public void onBindViewHolder(final ParticleViewHolder holder, final int position) {
             holder.tv.setText(strings.get(position));
             holder.root_layout.setDeleteListener(new ParticleLayout.DeleteListener() {
                 @Override
                 public void onDelete() {
-                    Toast.makeText(MainActivity.this, "POSITION = " + position, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "DETELE", Toast.LENGTH_SHORT).show();
                     strings.remove(position);
                     mAdapter.notifyItemRemoved(position);
-
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    }, 350);
+                    mAdapter.notifyItemRangeChanged(position, strings.size() - position);
                 }
             });
+            holder.root_layout.setBitmapArrays(R.drawable.ic_star, R.drawable.ic_partical, R.drawable.ic_boom);
         }
 
         @Override

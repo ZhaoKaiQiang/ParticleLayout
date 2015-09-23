@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import com.plattysoft.leonids.ParticleSystem;
 
 import java.lang.reflect.Field;
+import java.util.Random;
 
 /**
  * Created by zhaokaiqiang on 15/9/19.
@@ -21,6 +22,11 @@ import java.lang.reflect.Field;
 public class ParticleLayout extends FrameLayout {
 
     private static final String TAG = "ParticleLayout";
+
+    private static final int COUNT_OF_PARTICAL_BITMAP = 300;
+    private static final int TIME_TO_LIVE = 1000;
+    private static final int TIME_TO_FADE_OUT = 200;
+    private static final int DEFAULT_PARTICLE_BITMAP = R.drawable.ic_partical;
 
     private ViewGroup backLayout;
 
@@ -30,6 +36,8 @@ public class ParticleLayout extends FrameLayout {
     private float startX;
     private int clipWidth = 0;
     int[] backLocation;
+
+    private int[] bitmapArrays;
 
     private Rect backLayoutRect;
     private DeleteListener mDeleteListener;
@@ -53,6 +61,11 @@ public class ParticleLayout extends FrameLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+
+        if (getChildCount() != 1) {
+            throw new IllegalArgumentException("the count of child view must be one !");
+        }
+
         backLayout = (ViewGroup) getChildAt(0);
     }
 
@@ -85,11 +98,19 @@ public class ParticleLayout extends FrameLayout {
                 if (event.getX() > backLayoutRect.width() * 4 / 5) {
                     isSwape = true;
                     startX = event.getX();
-                    particleSystem = new ParticleSystem((Activity) getContext(), 300, R.drawable.ic_partical, 1000);
+
+                    if (bitmapArrays == null || bitmapArrays.length == 0) {
+                        particleSystem = new ParticleSystem((Activity) getContext(), COUNT_OF_PARTICAL_BITMAP, DEFAULT_PARTICLE_BITMAP, TIME_TO_LIVE);
+                    } else {
+                        Random random = new Random();
+                        int resId = bitmapArrays[random.nextInt(bitmapArrays.length)];
+                        particleSystem = new ParticleSystem((Activity) getContext(), COUNT_OF_PARTICAL_BITMAP, resId, TIME_TO_LIVE);
+                    }
+
                     particleSystem.setAcceleration(0.00013f, 90)
                             .setSpeedByComponentsRange(0f, 0.3f, 0.05f, 0.3f)
-                            .setFadeOut(200, new AccelerateInterpolator())
-                            .emitWithGravity(backLayout, Gravity.RIGHT, 300);
+                            .setFadeOut(TIME_TO_FADE_OUT, new AccelerateInterpolator())
+                            .emitWithGravity(backLayout, Gravity.RIGHT, COUNT_OF_PARTICAL_BITMAP);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -138,6 +159,10 @@ public class ParticleLayout extends FrameLayout {
 
     public void setDeleteListener(DeleteListener listener) {
         mDeleteListener = listener;
+    }
+
+    public void setBitmapArrays(int... resId) {
+        bitmapArrays = resId;
     }
 
     private int getStatuBarHeight() {
