@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.socks.library.ParticleLayout;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
