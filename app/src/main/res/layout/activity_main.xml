@@ -8,8 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
-        android:visibility="gone"
-        android:minHeight="?attr/actionBarSize" />
+        android:minHeight="?attr/actionBarSize"
+        />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"

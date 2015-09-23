@@ -28,10 +28,8 @@ public class ParticleLayout extends FrameLayout {
     private boolean isSwape = false;
     private boolean isDelete = false;
 
-
     private int animStartY;
     private int animEndY;
-    private int[] location;
     private float startX;
 
     private Rect backLayoutRect;
@@ -50,7 +48,6 @@ public class ParticleLayout extends FrameLayout {
 
     public ParticleLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        location = new int[2];
     }
 
     @Override
@@ -108,9 +105,7 @@ public class ParticleLayout extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 float width = startX - event.getX();
                 if (isSwape && width > 0) {
-                    mLayoutParams = new FrameLayout.LayoutParams((int) width, FrameLayout.LayoutParams.MATCH_PARENT, Gravity.RIGHT);
-                    frontLayout.setLayoutParams(mLayoutParams);
-                    frontLayout.getLocationInWindow(location);
+                    setFrontLayoutWidth((int) width);
                     particleSystem.updateEmitVerticalLine(frontLayout.getLeft(), animStartY, animEndY);
                 } else {
                     particleSystem.stopEmitting();
@@ -135,9 +130,7 @@ public class ParticleLayout extends FrameLayout {
                     }
                     Log.d(TAG, "isDelete = " + isDelete);
                 }
-
-                mLayoutParams = new FrameLayout.LayoutParams(0, FrameLayout.LayoutParams.MATCH_PARENT, Gravity.RIGHT);
-                frontLayout.setLayoutParams(mLayoutParams);
+                setFrontLayoutWidth(0);
                 break;
         }
 
@@ -156,6 +149,12 @@ public class ParticleLayout extends FrameLayout {
         mDeleteListener = listener;
     }
 
+
+    private void setFrontLayoutWidth(int width) {
+        mLayoutParams = (LayoutParams) frontLayout.getLayoutParams();
+        mLayoutParams.width = width;
+        frontLayout.setLayoutParams(mLayoutParams);
+    }
 
     private int getStatuBarHeight() {
 
