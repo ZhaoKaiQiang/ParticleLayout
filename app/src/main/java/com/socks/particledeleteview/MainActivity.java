@@ -1,7 +1,6 @@
 package com.socks.particledeleteview;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,8 +19,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ParticleAdapter mAdapter;
     private LinearLayoutManager layoutManager;
-
-    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
