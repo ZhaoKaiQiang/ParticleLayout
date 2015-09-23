@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.socks.library.ParticleLayout;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         ParticleAdapter() {
             strings = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 20; i++) {
                 strings.add("POSITION = " + i);
             }
         }

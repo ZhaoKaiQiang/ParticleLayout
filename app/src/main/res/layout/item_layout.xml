@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.socks.particledeleteview.ParticleLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.socks.library.ParticleLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
@@ -26,4 +26,4 @@
             android:textSize="20sp" />
     </android.support.v7.widget.CardView>
 
-</com.socks.particledeleteview.ParticleLayout>
+</com.socks.library.ParticleLayout>

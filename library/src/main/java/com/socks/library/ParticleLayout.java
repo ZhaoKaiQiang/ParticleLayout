@@ -1,11 +1,10 @@
-package com.socks.particledeleteview;
+package com.socks.library;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -29,9 +28,8 @@ public class ParticleLayout extends FrameLayout {
     private boolean isDelete = false;
 
     private float startX;
-
     private int clipWidth = 0;
-
+    int[] backLocation;
 
     private Rect backLayoutRect;
     private DeleteListener mDeleteListener;
@@ -47,31 +45,24 @@ public class ParticleLayout extends FrameLayout {
 
     public ParticleLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        backLayoutRect = new Rect();
+        backLocation = new int[2];
+    }
+
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        backLayout = (ViewGroup) getChildAt(0);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-
-        backLayout = (ViewGroup) getChildAt(0);
-        int[] backLocation = new int[2];
         backLayout.getLocationInWindow(backLocation);
-        backLayoutRect = new Rect(backLocation[0], backLocation[1],
+        backLayoutRect.set(backLocation[0], backLocation[1],
                 backLocation[0] + backLayout.getMeasuredWidth(),
                 backLocation[1] + backLayout.getMeasuredHeight());
-        Log.d(TAG, "onLayout----backLayoutRect = " + backLayoutRect.toString());
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        Log.d(TAG, "onSizeChanged ");
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        super.onWindowFocusChanged(hasWindowFocus);
-        Log.d(TAG, "onWindowFocusChanged ");
     }
 
     @Override
@@ -82,7 +73,7 @@ public class ParticleLayout extends FrameLayout {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-//        canvas.clipRect(0, 0, backLayoutRect.right - clipWidth, backLayoutRect.bottom);
+        canvas.clipRect(0, 0, backLayoutRect.right - clipWidth, getHeight());
         super.dispatchDraw(canvas);
     }
 
@@ -104,11 +95,12 @@ public class ParticleLayout extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 clipWidth = (int) (startX - event.getX());
                 if (isSwape && clipWidth > 0) {
+                    requestLayout();
                     particleSystem.updateEmitVerticalLine(backLayoutRect.right - clipWidth, backLayoutRect.top - getStatuBarHeight(), backLayoutRect.bottom - getStatuBarHeight());
-                    Log.d(TAG, "x = " + (backLayoutRect.right - clipWidth) + " minY = " + (backLayoutRect.top - getStatuBarHeight()) + " maxY = " + (backLayoutRect.bottom - getStatuBarHeight()));
+                } else {
+                    particleSystem.stopEmitting();
                 }
                 getParent().requestDisallowInterceptTouchEvent(true);
-                invalidate();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -129,7 +121,6 @@ public class ParticleLayout extends FrameLayout {
                     if (mDeleteListener != null) {
                         mDeleteListener.onDelete();
                     }
-                    Log.d(TAG, "isDelete = " + isDelete);
                 }
                 break;
         }
