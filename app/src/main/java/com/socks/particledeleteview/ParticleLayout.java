@@ -13,6 +13,8 @@ import android.widget.FrameLayout;
 
 import com.plattysoft.leonids.ParticleSystem;
 
+import java.lang.reflect.Field;
+
 /**
  * Created by zhaokaiqiang on 15/9/19.
  */
@@ -25,20 +27,18 @@ public class ParticleLayout extends FrameLayout {
 
     private boolean isSwape = false;
     private boolean isDelete = false;
-    private Rect backLayoutRect;
 
+
+    private int animStartY;
+    private int animEndY;
     private int[] location;
-
-    private FrameLayout.LayoutParams mLayoutParams;
     private float startX;
+
+    private Rect backLayoutRect;
+    private FrameLayout.LayoutParams mLayoutParams;
+
     private DeleteListener mDeleteListener;
-
-    private ParticleSystem particleSystem_1_5;
-    private ParticleSystem particleSystem_2_5;
-    private ParticleSystem particleSystem_3_5;
-    private ParticleSystem particleSystem_4_5;
-    private ParticleSystem particleSystem_5_5;
-
+    private ParticleSystem particleSystem;
 
     public ParticleLayout(Context context) {
         this(context, null);
@@ -67,11 +67,22 @@ public class ParticleLayout extends FrameLayout {
         }
 
         backLayout = (ViewGroup) getChildAt(0);
+        frontLayout = (ViewGroup) getChildAt(1);
+
+        MarginLayoutParams layoutParams = (MarginLayoutParams) backLayout.getLayoutParams();
 
         int[] backLocation = new int[2];
         backLayout.getLocationInWindow(backLocation);
-        backLayoutRect = new Rect(backLocation[0], backLocation[1], backLocation[0] + backLayout.getMeasuredWidth(), backLocation[1] + backLayout.getMeasuredHeight());
-        frontLayout = (ViewGroup) getChildAt(1);
+        backLayoutRect = new Rect(backLocation[0] + layoutParams.leftMargin,
+                backLocation[1] + layoutParams.topMargin,
+                backLocation[0] + backLayout.getMeasuredWidth() - layoutParams.rightMargin,
+                backLocation[1] + backLayout.getMeasuredHeight() - layoutParams.bottomMargin);
+
+        int[] frontLocation = new int[2];
+        frontLayout.getLocationInWindow(frontLocation);
+        animStartY = frontLocation[1] + layoutParams.topMargin - getStatuBarHeight();
+        animEndY = frontLocation[1] + frontLayout.getHeight() - layoutParams.bottomMargin -
+                getStatuBarHeight();
     }
 
     @Override
@@ -84,34 +95,14 @@ public class ParticleLayout extends FrameLayout {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                if (event.getX() > backLayoutRect.width() * 3 / 4) {
+                if (event.getX() > backLayoutRect.width() * 4 / 5) {
                     isSwape = true;
                     startX = event.getX();
-                    particleSystem_1_5 = new ParticleSystem((Activity) getContext(), 40, R.drawable.ic_partical, 1000);
-                    particleSystem_1_5.setAcceleration(0.00013f, 90)
+                    particleSystem = new ParticleSystem((Activity) getContext(), 300, R.drawable.ic_partical, 1000);
+                    particleSystem.setAcceleration(0.00013f, 90)
                             .setSpeedByComponentsRange(0f, 0.3f, 0.05f, 0.3f)
                             .setFadeOut(200, new AccelerateInterpolator())
-                            .emitWithGravity(frontLayout, Gravity.LEFT, 40);
-                    particleSystem_2_5 = new ParticleSystem((Activity) getContext(), 40, R.drawable.ic_partical, 1000);
-                    particleSystem_2_5.setAcceleration(0.00013f, 90)
-                            .setSpeedByComponentsRange(0f, 0.3f, 0.05f, 0.3f)
-                            .setFadeOut(200, new AccelerateInterpolator())
-                            .emitWithGravity(frontLayout, Gravity.LEFT, 40);
-                    particleSystem_3_5 = new ParticleSystem((Activity) getContext(), 40, R.drawable.ic_partical, 1000);
-                    particleSystem_3_5.setAcceleration(0.00013f, 90)
-                            .setSpeedByComponentsRange(0f, 0.3f, 0.05f, 0.3f)
-                            .setFadeOut(200, new AccelerateInterpolator())
-                            .emitWithGravity(frontLayout, Gravity.LEFT, 40);
-                    particleSystem_4_5 = new ParticleSystem((Activity) getContext(), 40, R.drawable.ic_partical, 1000);
-                    particleSystem_4_5.setAcceleration(0.00013f, 90)
-                            .setSpeedByComponentsRange(0f, 0.3f, 0.05f, 0.3f)
-                            .setFadeOut(200, new AccelerateInterpolator())
-                            .emitWithGravity(frontLayout, Gravity.LEFT, 40);
-                    particleSystem_5_5 = new ParticleSystem((Activity) getContext(), 40, R.drawable.ic_partical, 1000);
-                    particleSystem_5_5.setAcceleration(0.00013f, 90)
-                            .setSpeedByComponentsRange(0f, 0.3f, 0.05f, 0.3f)
-                            .setFadeOut(200, new AccelerateInterpolator())
-                            .emitWithGravity(frontLayout, Gravity.LEFT, 40);
+                            .emitWithGravity(frontLayout, Gravity.LEFT, 300);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -120,27 +111,16 @@ public class ParticleLayout extends FrameLayout {
                     mLayoutParams = new FrameLayout.LayoutParams((int) width, FrameLayout.LayoutParams.MATCH_PARENT, Gravity.RIGHT);
                     frontLayout.setLayoutParams(mLayoutParams);
                     frontLayout.getLocationInWindow(location);
-                    particleSystem_1_5.updateEmitPoint(frontLayout.getLeft(), location[1] + frontLayout.getHeight() * 1 / 5);
-                    particleSystem_2_5.updateEmitPoint(frontLayout.getLeft(), location[1] + frontLayout.getHeight() * 2 / 5);
-                    particleSystem_3_5.updateEmitPoint(frontLayout.getLeft(), location[1] + frontLayout.getHeight() * 3 / 5);
-                    particleSystem_4_5.updateEmitPoint(frontLayout.getLeft(), location[1] + frontLayout.getHeight() * 4 / 5);
-                }else{
-                    particleSystem_1_5.stopEmitting();
-                    particleSystem_2_5.stopEmitting();
-                    particleSystem_3_5.stopEmitting();
-                    particleSystem_4_5.stopEmitting();
-                    particleSystem_5_5.stopEmitting();
+                    particleSystem.updateEmitVerticalLine(frontLayout.getLeft(), animStartY, animEndY);
+                } else {
+                    particleSystem.stopEmitting();
                 }
                 getParent().requestDisallowInterceptTouchEvent(true);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 isSwape = false;
-                particleSystem_1_5.stopEmitting();
-                particleSystem_2_5.stopEmitting();
-                particleSystem_3_5.stopEmitting();
-                particleSystem_4_5.stopEmitting();
-                particleSystem_5_5.stopEmitting();
+                particleSystem.stopEmitting();
                 getParent().requestDisallowInterceptTouchEvent(false);
 
                 if (event.getX() >= getWidth() / 2) {
@@ -174,6 +154,22 @@ public class ParticleLayout extends FrameLayout {
 
     public void setDeleteListener(DeleteListener listener) {
         mDeleteListener = listener;
+    }
+
+
+    private int getStatuBarHeight() {
+
+        try {
+            Class c = Class.forName("com.android.internal.R$dimen");
+            Object obj = c.newInstance();
+            Field field = c.getField("status_bar_height");
+            int x = Integer.parseInt(field.get(obj).toString());
+            return getResources().getDimensionPixelSize(x);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
 }
