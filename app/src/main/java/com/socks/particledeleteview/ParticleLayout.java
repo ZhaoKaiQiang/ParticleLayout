@@ -2,6 +2,7 @@ package com.socks.particledeleteview;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,18 +24,16 @@ public class ParticleLayout extends FrameLayout {
     private static final String TAG = "ParticleLayout";
 
     private ViewGroup backLayout;
-    private ViewGroup frontLayout;
 
     private boolean isSwape = false;
     private boolean isDelete = false;
 
-    private int animStartY;
-    private int animEndY;
     private float startX;
 
-    private Rect backLayoutRect;
-    private FrameLayout.LayoutParams mLayoutParams;
+    private int clipWidth = 0;
 
+
+    private Rect backLayoutRect;
     private DeleteListener mDeleteListener;
     private ParticleSystem particleSystem;
 
@@ -54,37 +53,37 @@ public class ParticleLayout extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
-        if (getChildCount() != 2) {
-            throw new IllegalStateException("You only need two ViewGroup !");
-        }
-
-        if (!(getChildAt(0) instanceof ViewGroup) || !(getChildAt(1) instanceof ViewGroup)) {
-            throw new IllegalArgumentException(
-                    "The  children in ParticleLayout must be an instance of ViewGroup");
-        }
-
         backLayout = (ViewGroup) getChildAt(0);
-        frontLayout = (ViewGroup) getChildAt(1);
-
-        MarginLayoutParams layoutParams = (MarginLayoutParams) backLayout.getLayoutParams();
-
         int[] backLocation = new int[2];
         backLayout.getLocationInWindow(backLocation);
-        backLayoutRect = new Rect(backLocation[0] + layoutParams.leftMargin,
-                backLocation[1] + layoutParams.topMargin,
-                backLocation[0] + backLayout.getMeasuredWidth() - layoutParams.rightMargin,
-                backLocation[1] + backLayout.getMeasuredHeight() - layoutParams.bottomMargin);
+        backLayoutRect = new Rect(backLocation[0], backLocation[1],
+                backLocation[0] + backLayout.getMeasuredWidth(),
+                backLocation[1] + backLayout.getMeasuredHeight());
+        Log.d(TAG, "onLayout----backLayoutRect = " + backLayoutRect.toString());
+    }
 
-        int[] frontLocation = new int[2];
-        frontLayout.getLocationInWindow(frontLocation);
-        animStartY = frontLocation[1] + layoutParams.topMargin - getStatuBarHeight();
-        animEndY = frontLocation[1] + frontLayout.getHeight() - layoutParams.bottomMargin -
-                getStatuBarHeight();
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        Log.d(TAG, "onSizeChanged ");
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        Log.d(TAG, "onWindowFocusChanged ");
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return true;
+    }
+
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+//        canvas.clipRect(0, 0, backLayoutRect.right - clipWidth, backLayoutRect.bottom);
+        super.dispatchDraw(canvas);
     }
 
     @Override
@@ -99,21 +98,23 @@ public class ParticleLayout extends FrameLayout {
                     particleSystem.setAcceleration(0.00013f, 90)
                             .setSpeedByComponentsRange(0f, 0.3f, 0.05f, 0.3f)
                             .setFadeOut(200, new AccelerateInterpolator())
-                            .emitWithGravity(frontLayout, Gravity.LEFT, 300);
+                            .emitWithGravity(backLayout, Gravity.RIGHT, 300);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                float width = startX - event.getX();
-                if (isSwape && width > 0) {
-                    setFrontLayoutWidth((int) width);
-                    particleSystem.updateEmitVerticalLine(frontLayout.getLeft(), animStartY, animEndY);
-                } else {
-                    particleSystem.stopEmitting();
+                clipWidth = (int) (startX - event.getX());
+                if (isSwape && clipWidth > 0) {
+                    particleSystem.updateEmitVerticalLine(backLayoutRect.right - clipWidth, backLayoutRect.top - getStatuBarHeight(), backLayoutRect.bottom - getStatuBarHeight());
+                    Log.d(TAG, "x = " + (backLayoutRect.right - clipWidth) + " minY = " + (backLayoutRect.top - getStatuBarHeight()) + " maxY = " + (backLayoutRect.bottom - getStatuBarHeight()));
                 }
                 getParent().requestDisallowInterceptTouchEvent(true);
+                invalidate();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                startX = 0;
+                clipWidth = 0;
+                invalidate();
                 isSwape = false;
                 particleSystem.stopEmitting();
                 getParent().requestDisallowInterceptTouchEvent(false);
@@ -130,7 +131,6 @@ public class ParticleLayout extends FrameLayout {
                     }
                     Log.d(TAG, "isDelete = " + isDelete);
                 }
-                setFrontLayoutWidth(0);
                 break;
         }
 
@@ -147,13 +147,6 @@ public class ParticleLayout extends FrameLayout {
 
     public void setDeleteListener(DeleteListener listener) {
         mDeleteListener = listener;
-    }
-
-
-    private void setFrontLayoutWidth(int width) {
-        mLayoutParams = (LayoutParams) frontLayout.getLayoutParams();
-        mLayoutParams.width = width;
-        frontLayout.setLayoutParams(mLayoutParams);
     }
 
     private int getStatuBarHeight() {
