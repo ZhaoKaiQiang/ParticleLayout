@@ -11,5 +11,8 @@
 3. 添加多图片随机显示模式
 4. 修改粒子库
 
+#更多
 IOS版本请参考
 [https://github.com/MartinRGB/MTMaterialDelete](https://github.com/MartinRGB/MTMaterialDelete)
+
+My CSDN Blog :[http://blog.csdn.net/zhaokaiqiang1992](http://blog.csdn.net/zhaokaiqiang1992)
